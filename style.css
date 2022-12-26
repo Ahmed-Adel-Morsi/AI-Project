@@ -57,7 +57,7 @@ div {
     font-size: 4em;
     text-align: center;
     transition: 0.2s;
-    cursor: default;
+    cursor: pointer;
 }
 
 .board__box:hover{

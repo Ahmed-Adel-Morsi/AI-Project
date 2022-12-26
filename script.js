@@ -1,4 +1,4 @@
-var boxes = document.querySelectorAll ("[data-js='box']");
+var boxes = document.querySelectorAll (".box");
 
 /* X |  O | - : blank */
 var state = [
@@ -17,10 +17,10 @@ for (let i = 0; i < boxes.length ; i ++){
 function CheckWinner (state){
 	let isFinished = false ;
 
-	if (Utility(state, player) == 10) {
+	if (Utility(state) == 10) {
 		alert ("You lost");
 		isFinished = true ;
-	}else if (Utility(state, player) == -10) {
+	}else if (Utility(state) == -10) {
 		alert ("You won");
 		isFinished = true;
 	}else if (TerminalTest(state)) {
@@ -31,8 +31,8 @@ function CheckWinner (state){
 	if (!isFinished) return false ;
 
 	//Reset state
-	for (let i = 0 ; i < state[0].length ; i ++){
-		for (let j = 0 ; j < state[1].length ; j ++ ){
+	for (let i = 0 ; i < 3 ; i ++){
+		for (let j = 0 ; j < 3 ; j ++ ){
 			state [i][j] = '-';
 
 			BoxFromPosition(i, j).innerText = "";
@@ -46,8 +46,8 @@ function CheckWinner (state){
 
 function BoxClicked (e){
 
-	let i = e.target.getAttribute("data-coord-i");
-	let j = e.target.getAttribute("data-coord-j");
+	let i = e.target.getAttribute("row");
+	let j = e.target.getAttribute("col");
 
 	let action = {
 		symbol: player,
@@ -93,7 +93,7 @@ function BoxClicked (e){
 }
 
 function BoxFromPosition (i, j){
-	let k = i * state[0].length + j;
+	let k = i * 3 + j;
 
 	return boxes[k];
 }
@@ -103,7 +103,7 @@ function AIMove (state){
 	
 	let maxScore = -Infinity;
 	let bestAction = null ;
-	Action(state).forEach(action_position => {
+	EmptyCells(state).forEach(action_position => {
 		let current_action ={
 			symbol: ai,
 			position: action_position
@@ -133,7 +133,7 @@ function Minimax (state, depth, isMaximizingPlayer){
 	
 		let maxEva = -Infinity;
 
-		Action(state).forEach(action_position => {
+		EmptyCells(state).forEach(action_position => {
 			let current_action = {
 				symbol: ai,
 				position: action_position
@@ -148,7 +148,7 @@ function Minimax (state, depth, isMaximizingPlayer){
 
 		let minEva = Infinity;
 
-		Action(state).forEach(action_position => {
+		EmptyCells(state).forEach(action_position => {
 			let current_action = {
 				symbol: player,
 				position: action_position
@@ -173,7 +173,7 @@ function MinimaxPruning (state, depth, alpha, beta, isMaximizingPlayer){
 
 		let maxEva = -Infinity;
 
-		Action(state).forEach(action_position => {
+		EmptyCells(state).forEach(action_position => {
 			let current_action = {
 				symbol: ai,
 				position: action_position
@@ -192,7 +192,7 @@ function MinimaxPruning (state, depth, alpha, beta, isMaximizingPlayer){
 
 		let minEva = Infinity;
 
-		Action(state).forEach(action_position => {
+		EmptyCells(state).forEach(action_position => {
 			let current_action = {
 				symbol: player,
 				position: action_position
@@ -210,12 +210,12 @@ function MinimaxPruning (state, depth, alpha, beta, isMaximizingPlayer){
 }
 
 // Returns all the empty boxes
-function Action (state){
+function EmptyCells (state){
 	let k = 0 ;
-	legal_actions = [];
+	let legal_actions = [];
 
-	for (let i = 0 ; i < state[0].length ; i ++){
-		for (let j = 0 ; j < state[1].length ; j ++ ){
+	for (let i = 0 ; i < 3 ; i ++){
+		for (let j = 0 ; j < 3 ; j ++ ){
 			
 			if (state[i][j] == '-'){
 				legal_actions[k++] = [i,j];
@@ -229,26 +229,26 @@ function Action (state){
 // Result on the state after an action is taken
 function Result (state, action) {
 	var new_state = new Array ();
-	for (let i = 0 ; i < state[0].length ; i ++){
+	for (let i = 0 ; i < 3 ; i ++){
 		new_state[i] = new Array ();
-		for (let j = 0 ; j < state[1].length ; j ++ ){
+		for (let j = 0 ; j < 3 ; j ++ ){
 			new_state [i][j] = state[i][j];
 		}
 	}
 
-	sym = action.symbol;
-	pos = action.position;
+	var sym = action.symbol;
+	var pos = action.position;
 
 	new_state [pos[0]][pos[1]] = sym;
 
 	return new_state;
 }
 
-// returns 10  if ai wins, -10 if ai loose, 0 if draw
-function Utility (state, player){
+// returns 10  if ai wins, -10 if ai lose
+function Utility (state){
 
-	//Check horizontally
-	for ( let i = 0 ; i < state[0].length; i ++){
+	//الصفوف الافقية
+	for ( let i = 0 ; i < 3; i ++){
 		if (state[i][0] == '-') continue;
 
 		if (state[i][0] == state [i][1] && state[i][1] == state[i][2]) {
@@ -259,8 +259,8 @@ function Utility (state, player){
 		}
 	}
 
-	//Check Vertcially
-	for ( let j = 0 ; j < state[1].length; j ++){
+	//الأعمدة الرأسية
+	for ( let j = 0 ; j < 3; j ++){
 		if (state[0][j] == '-') continue;
 
 		if (state[0][j] == state [1][j] && state[1][j] == state[2][j]){
@@ -271,10 +271,10 @@ function Utility (state, player){
 		}
 	}
 
-	//Check diagonally
+	//القطرين
 	if (
-		( (state[0][0] == state[1][1] && state[1][1] == state[2][2])
-		|| (state[0][2] == state[1][1] && state[1][1] == state[2][0]) )
+		 (state[0][0] == state[1][1] && state[1][1] == state[2][2])
+		|| (state[0][2] == state[1][1] && state[1][1] == state[2][0]) 
 		){
 			if (state[1][1] == '-') return 0;
 
@@ -291,11 +291,11 @@ function Utility (state, player){
 
 //If state is a terminal state
 function TerminalTest (state){
-	if (Utility(state, player) == -10) return true ;
-	if (Utility(state, ai) == 10) return true;
+	if (Utility(state) == -10) return true ;
+	if (Utility(state) == 10) return true;
 
-	for (let i = 0 ; i < state[0].length; i ++){
-		for (let j = 0 ; j < state[1].length ; j ++ ){
+	for (let i = 0 ; i < 3; i ++){
+		for (let j = 0 ; j < 3 ; j ++ ){
 			if (state[i][j] == '-')
 				return false;
 		}
